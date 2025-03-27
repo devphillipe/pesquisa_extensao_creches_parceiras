@@ -2,4 +2,3 @@ streamlit==latest
 pandas==latest
 plotly==latest
 openpyxl==latest
-pip==latest
