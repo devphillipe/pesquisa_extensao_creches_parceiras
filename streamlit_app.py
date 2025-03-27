@@ -1,195 +1,69 @@
-{
-  "nbformat": 4,
-  "nbformat_minor": 0,
-  "metadata": {
-    "colab": {
-      "provenance": [],
-      "mount_file_id": "1V4Lu1miM0CE1QBOR4i3cAXg1r69xcDsm",
-      "authorship_tag": "ABX9TyPa2zbbehoEREnDb4pb6wf0",
-      "include_colab_link": True
-    },
-    "kernelspec": {
-      "name": "python3",
-      "display_name": "Python 3"
-    },
-    "language_info": {
-      "name": "python"
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+# Definir o caminho do arquivo (suba a planilha para o mesmo repositório do app)
+file_path = "pesquisa_extensao_creches_parceiras.xlsx"
+
+# Carregar a planilha Excel
+@st.cache_data
+def carregar_dados():
+    return pd.read_excel(file_path)
+
+df = carregar_dados()
+
+# Contagem e porcentagem das respostas
+capacidade_contagem = df['Sua creche tem capacidade para atender crianças até as 17h?'].value_counts()
+capacidade_porcentagem = df['Sua creche tem capacidade para atender crianças até as 17h?'].value_counts(normalize=True) * 100
+
+# Criando o gráfico de barras interativo usando Plotly
+fig = px.bar(
+    x=capacidade_contagem.index,
+    y=capacidade_contagem.values,
+    labels={'x': 'Resposta', 'y': 'Quantidade'},
+    title="Capacidade das Creches para Atender Crianças até as 17h",
+    text=capacidade_porcentagem.round(1).astype(str) + '%',
+    color=capacidade_contagem.index,
+    color_discrete_map={
+        'Sim, sem restrições': '#2ECC71',  # Verde
+        'Não temos condições no momento': '#E74C3C',  # Vermelho
+        'Sim, mas com limitações (descrever abaixo)': '#F1C40F'  # Amarelo
     }
-  },
-  "cells": [
-    {
-      "cell_type": "markdown",
-      "metadata": {
-        "id": "view-in-github",
-        "colab_type": "text"
-      },
-      "source": [
-        "<a href=\"https://colab.research.google.com/github/devphillipe/pesquisa_extensao_creches_parceiras/blob/main/streamlit_app.py\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
-      ]
-    },
-    {
-      "cell_type": "code",
-      "execution_count": None,
-      "metadata": {
-        "colab": {
-          "base_uri": "https://localhost:8080/"
-        },
-        "id": "py6D-MwMQcEe",
-        "outputId": "ba2611b7-4904-47c4-fcd9-b229f5b0d1f6"
-      },
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Requirement already satisfied: streamlit in /usr/local/lib/python3.11/dist-packages (1.44.0)\n",
-            "Requirement already satisfied: plotly in /usr/local/lib/python3.11/dist-packages (5.24.1)\n",
-            "Requirement already satisfied: pandas in /usr/local/lib/python3.11/dist-packages (2.2.2)\n",
-            "Requirement already satisfied: openpyxl in /usr/local/lib/python3.11/dist-packages (3.1.5)\n",
-            "Requirement already satisfied: pyngrok in /usr/local/lib/python3.11/dist-packages (7.2.3)\n",
-            "Requirement already satisfied: altair<6,>=4.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (5.5.0)\n",
-            "Requirement already satisfied: blinker<2,>=1.0.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (1.9.0)\n",
-            "Requirement already satisfied: cachetools<6,>=4.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (5.5.2)\n",
-            "Requirement already satisfied: click<9,>=7.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (8.1.8)\n",
-            "Requirement already satisfied: numpy<3,>=1.23 in /usr/local/lib/python3.11/dist-packages (from streamlit) (2.0.2)\n",
-            "Requirement already satisfied: packaging<25,>=20 in /usr/local/lib/python3.11/dist-packages (from streamlit) (24.2)\n",
-            "Requirement already satisfied: pillow<12,>=7.1.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (11.1.0)\n",
-            "Requirement already satisfied: protobuf<6,>=3.20 in /usr/local/lib/python3.11/dist-packages (from streamlit) (5.29.4)\n",
-            "Requirement already satisfied: pyarrow>=7.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (18.1.0)\n",
-            "Requirement already satisfied: requests<3,>=2.27 in /usr/local/lib/python3.11/dist-packages (from streamlit) (2.32.3)\n",
-            "Requirement already satisfied: tenacity<10,>=8.1.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (9.0.0)\n",
-            "Requirement already satisfied: toml<2,>=0.10.1 in /usr/local/lib/python3.11/dist-packages (from streamlit) (0.10.2)\n",
-            "Requirement already satisfied: typing-extensions<5,>=4.4.0 in /usr/local/lib/python3.11/dist-packages (from streamlit) (4.12.2)\n",
-            "Requirement already satisfied: watchdog<7,>=2.1.5 in /usr/local/lib/python3.11/dist-packages (from streamlit) (6.0.0)\n",
-            "Requirement already satisfied: gitpython!=3.1.19,<4,>=3.0.7 in /usr/local/lib/python3.11/dist-packages (from streamlit) (3.1.44)\n",
-            "Requirement already satisfied: pydeck<1,>=0.8.0b4 in /usr/local/lib/python3.11/dist-packages (from streamlit) (0.9.1)\n",
-            "Requirement already satisfied: tornado<7,>=6.0.3 in /usr/local/lib/python3.11/dist-packages (from streamlit) (6.4.2)\n",
-            "Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/lib/python3.11/dist-packages (from pandas) (2.8.2)\n",
-            "Requirement already satisfied: pytz>=2020.1 in /usr/local/lib/python3.11/dist-packages (from pandas) (2025.1)\n",
-            "Requirement already satisfied: tzdata>=2022.7 in /usr/local/lib/python3.11/dist-packages (from pandas) (2025.1)\n",
-            "Requirement already satisfied: et-xmlfile in /usr/local/lib/python3.11/dist-packages (from openpyxl) (2.0.0)\n",
-            "Requirement already satisfied: PyYAML>=5.1 in /usr/local/lib/python3.11/dist-packages (from pyngrok) (6.0.2)\n",
-            "Requirement already satisfied: jinja2 in /usr/local/lib/python3.11/dist-packages (from altair<6,>=4.0->streamlit) (3.1.6)\n",
-            "Requirement already satisfied: jsonschema>=3.0 in /usr/local/lib/python3.11/dist-packages (from altair<6,>=4.0->streamlit) (4.23.0)\n",
-            "Requirement already satisfied: narwhals>=1.14.2 in /usr/local/lib/python3.11/dist-packages (from altair<6,>=4.0->streamlit) (1.31.0)\n",
-            "Requirement already satisfied: gitdb<5,>=4.0.1 in /usr/local/lib/python3.11/dist-packages (from gitpython!=3.1.19,<4,>=3.0.7->streamlit) (4.0.12)\n",
-            "Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.11/dist-packages (from python-dateutil>=2.8.2->pandas) (1.17.0)\n",
-            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.11/dist-packages (from requests<3,>=2.27->streamlit) (3.4.1)\n",
-            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.11/dist-packages (from requests<3,>=2.27->streamlit) (3.10)\n",
-            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.11/dist-packages (from requests<3,>=2.27->streamlit) (2.3.0)\n",
-            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.11/dist-packages (from requests<3,>=2.27->streamlit) (2025.1.31)\n",
-            "Requirement already satisfied: smmap<6,>=3.0.1 in /usr/local/lib/python3.11/dist-packages (from gitdb<5,>=4.0.1->gitpython!=3.1.19,<4,>=3.0.7->streamlit) (5.0.2)\n",
-            "Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.11/dist-packages (from jinja2->altair<6,>=4.0->streamlit) (3.0.2)\n",
-            "Requirement already satisfied: attrs>=22.2.0 in /usr/local/lib/python3.11/dist-packages (from jsonschema>=3.0->altair<6,>=4.0->streamlit) (25.3.0)\n",
-            "Requirement already satisfied: jsonschema-specifications>=2023.03.6 in /usr/local/lib/python3.11/dist-packages (from jsonschema>=3.0->altair<6,>=4.0->streamlit) (2024.10.1)\n",
-            "Requirement already satisfied: referencing>=0.28.4 in /usr/local/lib/python3.11/dist-packages (from jsonschema>=3.0->altair<6,>=4.0->streamlit) (0.36.2)\n",
-            "Requirement already satisfied: rpds-py>=0.7.1 in /usr/local/lib/python3.11/dist-packages (from jsonschema>=3.0->altair<6,>=4.0->streamlit) (0.23.1)\n",
-            "Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount(\"/content/drive\", force_remount=True).\n",
-            "Your Streamlit app is available at: NgrokTunnel: \"https://ec65-34-73-75-205.ngrok-free.app\" -> \"http://localhost:8501\"\n"
-          ]
-        }
-      ],
-      "source": [
-        "# Instalando as bibliotecas necessárias\n",
-        "!pip install streamlit plotly pandas openpyxl pyngrok\n",
-        "\n",
-        "# Montando o Google Drive\n",
-        "from google.colab import drive\n",
-        "drive.mount('/content/drive')\n",
-        "\n",
-        "# Criando o script do Streamlit\n",
-        "script = \"\"\"\n",
-        "import streamlit as st\n",
-        "import pandas as pd\n",
-        "import plotly.express as px\n",
-        "\n",
-        "# Definindo o caminho do arquivo no Google Drive\n",
-        "file_path = '/content/drive/MyDrive/Colab Notebooks/pesquisa_extensao_creches_parceiras/pesquisa_extensao_creches_parceiras.xlsx'\n",
-        "\n",
-        "# Carregar a planilha Excel\n",
-        "df = pd.read_excel(file_path)\n",
-        "\n",
-        "# Contagem e porcentagem das respostas\n",
-        "capacidade_contagem = df['Sua creche tem capacidade para atender crianças até as 17h?'].value_counts()\n",
-        "capacidade_porcentagem = df['Sua creche tem capacidade para atender crianças até as 17h?'].value_counts(normalize=True) * 100\n",
-        "\n",
-        "# Criando o gráfico de barras interativo usando Plotly\n",
-        "fig = px.bar(\n",
-        "    x=capacidade_contagem.index,\n",
-        "    y=capacidade_contagem.values,\n",
-        "    labels={'x': 'Resposta', 'y': 'Quantidade'},\n",
-        "    title=\"Capacidade das Creches para Atender Crianças até as 17h\",\n",
-        "    text=capacidade_porcentagem.round(1).astype(str) + '%',\n",
-        "    color=capacidade_contagem.index,\n",
-        "    color_discrete_map={\n",
-        "        'Sim, sem restrições': '#2ECC71',  # Verde\n",
-        "        'Não temos condições no momento': '#E74C3C',  # Vermelho\n",
-        "        'Sim, mas com limitações (descrever abaixo)': '#F1C40F'  # Amarelo\n",
-        "    }\n",
-        ")\n",
-        "\n",
-        "# Ajustes no layout do gráfico\n",
-        "fig.update_traces(\n",
-        "    textposition='outside',\n",
-        "    marker=dict(line=dict(color='#FFFFFF', width=1))\n",
-        ")\n",
-        "\n",
-        "fig.update_layout(\n",
-        "    template='plotly_dark',\n",
-        "    xaxis_title='Resposta',\n",
-        "    yaxis_title='Quantidade',\n",
-        "    xaxis=dict(\n",
-        "        title_standoff=25,\n",
-        "        tickangle=0,\n",
-        "        automargin=True\n",
-        "    ),\n",
-        "    yaxis=dict(\n",
-        "        automargin=True,\n",
-        "        showgrid=True,\n",
-        "        gridcolor='rgba(255,255,255,0.2)'\n",
-        "    ),\n",
-        "    margin=dict(l=50, r=50, t=50, b=80),\n",
-        "    showlegend=False\n",
-        ")\n",
-        "\n",
-        "# Interface do Streamlit\n",
-        "st.set_page_config(page_title=\"Dashboard das Creches\", layout=\"wide\")\n",
-        "\n",
-        "# Título\n",
-        "st.title(\"📊 Dashboard de Capacidades das Creches\")\n",
-        "\n",
-        "# Exibir gráfico interativo\n",
-        "st.plotly_chart(fig, use_container_width=True)\n",
-        "\n",
-        "# Exibir tabela com respostas das creches\n",
-        "st.subheader(\"📋 Respostas das Creches\")\n",
-        "\n",
-        "# Melhorando a tabela visualmente\n",
-        "st.dataframe(df.style.set_properties(**{\n",
-        "    'background-color': '#1e1e1e',\n",
-        "    'color': 'white',\n",
-        "    'border-color': 'gray',\n",
-        "    'white-space': 'pre-wrap'  # Adiciona quebra de linha automática nos textos longos\n",
-        "}))\n",
-        "\"\"\"\n",
-        "\n",
-        "# Criando um arquivo Python para rodar o Streamlit\n",
-        "with open(\"app.py\", \"w\") as f:\n",
-        "    f.write(script)\n",
-        "\n",
-        "# Rodando o Streamlit no Google Colab com o ngrok\n",
-        "from pyngrok import ngrok\n",
-        "\n",
-        "# Defina seu authtoken do ngrok\n",
-        "ngrok.set_auth_token('2uuFjRe31khFgkebP3BbKw2YoSp_7Vm2UTxn8oE8qxvaq6VXx')\n",
-        "\n",
-        "# Abre o túnel na porta 8501 com URL personalizada\n",
-        "public_url = ngrok.connect(8501)\n",
-        "print(f\"Your Streamlit app is available at: {public_url}\")\n",
-        "\n",
-        "# Rodando o Streamlit\n",
-        "!streamlit run app.py &>/dev/null &\n"
-      ]
-    }
-  ]
-}
+)
+
+# Ajustes no layout do gráfico
+fig.update_traces(
+    textposition='outside',
+    marker=dict(line=dict(color='#FFFFFF', width=1))
+)
+
+fig.update_layout(
+    template='plotly_dark',
+    xaxis_title='Resposta',
+    yaxis_title='Quantidade',
+    xaxis=dict(
+        title_standoff=25,
+        tickangle=0,
+        automargin=True
+    ),
+    yaxis=dict(
+        automargin=True,
+        showgrid=True,
+        gridcolor='rgba(255,255,255,0.2)'
+    ),
+    margin=dict(l=50, r=50, t=50, b=80),
+    showlegend=False
+)
+
+# Interface do Streamlit
+st.set_page_config(page_title="Dashboard das Creches", layout="wide")
+
+# Título
+st.title("📊 Dashboard de Capacidades das Creches")
+
+# Exibir gráfico interativo
+st.plotly_chart(fig, use_container_width=True)
+
+# Exibir tabela com respostas das creches
+st.subheader("📋 Respostas das Creches")
+st.dataframe(df)
