@@ -2,7 +2,10 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Definir o caminho do arquivo (suba a planilha para o mesmo repositório do app)
+# ⚠️ set_page_config precisa ser o primeiro comando Streamlit
+st.set_page_config(page_title="Dashboard das Creches", layout="wide")
+
+# Definir o caminho do arquivo
 file_path = "pesquisa_extensao_creches_parceiras.xlsx"
 
 # Carregar a planilha Excel
@@ -54,9 +57,6 @@ fig.update_layout(
     margin=dict(l=50, r=50, t=50, b=80),
     showlegend=False
 )
-
-# Interface do Streamlit
-st.set_page_config(page_title="Dashboard das Creches", layout="wide")
 
 # Título
 st.title("📊 Dashboard de Capacidades das Creches")
