@@ -59,7 +59,7 @@ fig.update_layout(
 )
 
 # Título
-st.title("📊 Dashboard de Capacidades das Creches")
+st.title("📊 Dashboard - Extensao de horario para as 17h - Creches Parceiras")
 
 # Exibir gráfico interativo
 st.plotly_chart(fig, use_container_width=True)
